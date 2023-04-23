@@ -18,3 +18,14 @@ body {
   max-width: 320px;
   margin-bottom: 16px;
 }
+
+div {
+  display: flex;
+  flex-direction: column;
+}
+.list {
+  background-color: beige;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
