@@ -19,33 +19,38 @@ const debounce = (callback, delay) => {
 
 const handleInput = event => {
   if (inputText.value === '') {
-      Notify.warning(`❌ Rejected null`);
-      
-            ul.style.display = 'none';
-            div.style.display = 'none';
+    ul.style.display = 'none';
+    div.style.display = 'none';
   } else {
-    fetch(`${API_URL}${inputText.value}`)
-      .then(response => response.json())
+    fetch(`${API_URL}${inputText.value.trim()}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Oops, there is no country with that name');
+        }
+        return response.json();
+      })
       .then(users => {
         if (users.length >= 2 && users.length <= 10) {
           const tpl = users.map(
             user =>
               `<li><img src="${user.flags.svg}" alt="Flag of ${user.name.common}" width="50" height="30">${user.name.common}</li>`
           );
-            ul.style.display = 'flex';
-            div.style.display = 'none'
-            ul.innerHTML = `<ul>${tpl}</ul>`;
+          ul.style.display = 'flex';
+          div.style.display = 'none'
+          ul.innerHTML = `<ul>${tpl}</ul>`;
             
         }
         else if (users.length > 10) {
           Notify.info(
             `"Too many matches found. Please enter a more specific name."`
           );
+          ul.style.display = 'none';
+          div.style.display = 'none';
         }
-        else if(users.length===1){
-            const tpl = users.map(
-              user =>
-                `
+        else if (users.length === 1) {
+          const tpl = users.map(
+            user =>
+              `
                 <div class="list"> 
                 <img src="${user.flags.svg}"
                  alt="Flag of ${user.name.common}" 
@@ -59,17 +64,21 @@ const handleInput = event => {
                  </div>
                  <div class="list"> 
                  <h6>Languages: </h6>   ${Object.values(user.languages).join(
-                   ', '
-                 )}
+                ', '
+              )}
                  </div> `
-              //languages es un objeto por lo que pueden haber varios idiomas
-            );
-             div.style.display = 'flex';
-             ul.style.display = 'none';
-            div.innerHTML = `${tpl}`;
+            //languages es un objeto por lo que pueden haber varios idiomas
+          );
+          div.style.display = 'flex';
+          ul.style.display = 'none';
+          div.innerHTML = `${tpl}`;
         }
           
           
+      }).catch(error => {
+        Notify.failure(error)
+          ul.style.display = 'none';
+          div.style.display = 'none';
       });
   }
 };
